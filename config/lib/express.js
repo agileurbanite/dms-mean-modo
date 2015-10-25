@@ -39,6 +39,7 @@ module.exports.initLocalVariables = function (app) {
   app.locals.logo = config.logo;
   app.locals.favicon = config.favicon;
 
+
   // Passing the request url to environment locals
   app.use(function (req, res, next) {
     res.locals.host = req.protocol + '://' + req.hostname;
@@ -51,6 +52,20 @@ module.exports.initLocalVariables = function (app) {
  * Initialize application middleware
  */
 module.exports.initMiddleware = function (app) {
+  var allowCrossDomain = function(req, res, next) {
+    res.header('Access-Control-Allow-Origin', '*');
+    res.header('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE,OPTIONS');
+    res.header("Access-Control-Allow-Headers", "Origin, Content-Type, Authorization, Accept, X-Requested-With, Cache-Control, Pragma, Range, Accept-Encoding, X-User-Action, BUS_EVT_ID, EVT_SYNCH_TOKEN");
+    res.header("Access-Control-Max-Age", "1728000");
+    res.header("Access-Control-Expose-Headers", "Accept-Ranges, Content-Encoding, Content-Length, Content-Range");
+
+    // intercept OPTIONS method
+    if ('OPTIONS' === req.method) {
+      res.send(200);
+    } else {
+      next();
+    }
+  };
   // Showing stack errors
   app.set('showStackError', true);
 
@@ -85,6 +100,8 @@ module.exports.initMiddleware = function (app) {
   }));
   app.use(bodyParser.json());
   app.use(methodOverride());
+
+  app.use(allowCrossDomain);
 
   // Add the cookie parser and flash middleware
   app.use(cookieParser());
